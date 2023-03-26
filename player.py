@@ -1,14 +1,11 @@
 
 import pygame
+from character import Character
 
-class Player(pygame.sprite.Sprite):
+
+class Player(Character):
     def __init__(self):
         super().__init__()
-
-        # gravity
-        self.gravity = 0.5
-        self.y_vel = 0
-        self.x_vel = 0
 
         # Load the sprite sheet and extract idle frames
         idle_sprite_sheet = pygame.image.load(
@@ -35,15 +32,18 @@ class Player(pygame.sprite.Sprite):
         self.frame_update_time = 100
         self.last_frame_update = pygame.time.get_ticks()
 
-    def extract_frames(self, sprite_sheet, frame_width, frame_height, num_frames):
-        frames = []
-        for i in range(num_frames):
-            frame = pygame.Surface(
-                (frame_width, frame_height), pygame.SRCALPHA, 32)
-            frame.blit(sprite_sheet, (0, 0),
-                       (i * frame_width, 0, frame_width, frame_height))
-            frames.append(frame)
-        return frames
+    def attack_enemy(self, enemy):
+        enemy.health -= self.attack
+
+    def receive_damage(self, enemy):
+        self.health -= enemy.attack
+
+    def is_attacking(self):
+        mouse = pygame.mouse.get_pressed()
+        return mouse[0] != 0
+
+    def is_collided_with(self, other):
+        return pygame.sprite.collide_rect(self, other)
 
     def update(self):
         # Animate player idle state
@@ -55,7 +55,7 @@ class Player(pygame.sprite.Sprite):
 
         # Move player based on arrow key input
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_a]:
             # Flip the image on the x-axis to face left
             self.frame_idx = (self.frame_idx + 1) % len(self.run_frames)
             flipped_frame = pygame.transform.flip(
@@ -63,14 +63,14 @@ class Player(pygame.sprite.Sprite):
             self.image = flipped_frame
 
             self.rect.x -= 5
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_d]:
 
             self.frame_idx = (self.frame_idx + 1) % len(self.run_frames)
             self.image = self.run_frames[self.frame_idx]
             self.rect.x += 5
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_w]:
             self.rect.y -= 5
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_s]:
             self.rect.y += 5
         # jump
         if keys[pygame.K_SPACE]:
