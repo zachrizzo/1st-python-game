@@ -32,8 +32,14 @@ class Player(Character):
         self.frame_update_time = 100
         self.last_frame_update = pygame.time.get_ticks()
 
+        self.attack_cooldown = 500  # Cooldown time in milliseconds
+        self.last_attack_time = 0
+
     def attack_enemy(self, enemy):
-        enemy.health -= self.attack
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_attack_time >= self.attack_cooldown:
+            enemy.receive_damage(self)
+            self.last_attack_time = current_time
 
     def receive_damage(self, enemy):
         self.health -= enemy.attack
@@ -42,8 +48,8 @@ class Player(Character):
         mouse = pygame.mouse.get_pressed()
         return mouse[0] != 0
 
-    def is_collided_with(self, other):
-        return pygame.sprite.collide_rect(self, other)
+    # def is_collided_with(self, other):
+    #     return pygame.sprite.collide_rect(self, other)
 
     def update(self):
         # Animate player idle state
@@ -89,3 +95,6 @@ class Player(Character):
             self.frame_idx = (self.frame_idx + 1) % len(self.attack_frames)
             self.image = self.attack_frames[self.frame_idx]
             self.last_frame_update = now
+
+        if self.health <= 0:
+            self.kill()

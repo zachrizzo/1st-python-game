@@ -26,3 +26,6 @@ class Character(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, ground_sprites, False):
             self.rect.y = ground_sprites.sprite.rect.y - self.rect.height
             self.y_vel = 0
+
+    def is_collided_with(self, other):
+        return pygame.sprite.collide_rect(self, other)

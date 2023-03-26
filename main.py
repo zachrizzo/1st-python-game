@@ -37,13 +37,19 @@ class Game:
 
         self.camera_offset_x = 0
 
+        # None uses the default font, 36 is the font size
+        self.font = pygame.font.Font(None, 36)
+
+    def render_player_health(self):
+        health_text = f"Health: {self.player.health}"
+        health_surface = self.font.render(health_text, True, (0, 0, 0))
+        return health_surface
+
     def run(self):
         while not self.game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_over = True
-
-            self.all_sprites.update()
 
             current_time = pygame.time.get_ticks()
             if not self.enemy_spawned and current_time - self.last_enemy_spawn_time >= self.enemy_spawn_time:
@@ -54,6 +60,9 @@ class Game:
             if self.player.is_attacking() and self.player.is_collided_with(self.enemy):
                 self.player.attack_enemy(self.enemy)
 
+            if self.enemy.is_collided_with(self.player):
+                self.enemy.attack_player(self.player)
+
             # Check for collisions between player and ground
             self.player.handle_collision_with_ground(self.ground_sprites)
             self.enemy.handle_collision_with_ground(self.ground_sprites)
@@ -61,17 +70,23 @@ class Game:
             # Update the camera offset based on the player's position
             self.camera_offset_x = self.player.rect.x - Game.DISPLAY_WIDTH // 2
 
+            self.all_sprites.update()
+
             # Draw game objects
             self.game_display.fill(Game.WHITE)
             for sprite in self.all_sprites:
                 self.game_display.blit(
                     sprite.image, (sprite.rect.x - self.camera_offset_x, sprite.rect.y))
+
+            # Draw the health text after game objects
+            health_surface = self.render_player_health()
+            self.game_display.blit(health_surface, (10, 10))
+
             pygame.display.flip()
             self.clock.tick(60)
-
-        pygame.quit()
 
 
 if __name__ == "__main__":
     game = Game()
     game.run()
+    pygame.quit()

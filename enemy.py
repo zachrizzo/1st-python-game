@@ -34,8 +34,14 @@ class Enemy(Character):
         self.frame_update_time = 100
         self.last_frame_update = pygame.time.get_ticks()
 
+        self.attack_cooldown = 1000  # Cooldown time in milliseconds
+        self.last_attack_time = 0
+
     def attack_player(self, player):
-        player.health -= self.attack
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_attack_time >= self.attack_cooldown:
+            player.receive_damage(self)
+            self.last_attack_time = current_time
 
     def receive_damage(self, player):
         self.health -= player.attack
